@@ -56,7 +56,7 @@ MongoClient.connect("mongodb://localhost:27017/", { useUnifiedTopology: true }, 
     io.sockets.on('connection',
     function(client) {
         client.on('sensores', function (data) {
-            var datosActualizados = { descripcion: "Modificando sensores... ", ilum: data.ilum, temp: data.temp };
+            var datosActualizados = { descripcion: "Modificando sensores... ", ilum: data.ilum, temp: data.temp, fecha: new Date() };
 
             collection.insertOne(datosActualizados).then(function(result) {});
 
@@ -72,13 +72,11 @@ MongoClient.connect("mongodb://localhost:27017/", { useUnifiedTopology: true }, 
             Agente(iluminacion, temperatura, client, AireOn, VentanaAbierta);
 
             collection.find().toArray().then(function(items) {
-                console.log("items:", JSON.stringify(items));
                 client.emit('historico', items);
             });
         });
 
         collection.find().toArray().then(function(items) {
-            console.log("items:", JSON.stringify(items));
             client.emit('historico', items);
         });
 

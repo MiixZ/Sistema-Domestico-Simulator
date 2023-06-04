@@ -61,6 +61,11 @@
 				var val1 = document.getElementById("temp").value;
 				var val2 = document.getElementById("ilum").value;
 				
+				if(isNaN(val1) || isNaN(val2) || val1 == "" || val2 == "" || val2 < 0 || val2 > 100 || val1 < -273 || val1 > 100) {
+					alert("Introduzca valores numéricos");
+					return;
+				}
+				
 				socket.emit('sensores', {temp: val1, ilum: val2});
 
 				document.getElementById("temp").value = "";
@@ -96,7 +101,8 @@
 					descripcion = JSON.stringify(datos[i].descripcion);
 					temperatura = JSON.stringify(datos[i].temp);
 					iluminacion = JSON.stringify(datos[i].ilum);
-					listItem.innerHTML = descripcion + " - " + temperatura + "º - " + iluminacion + "%";
+					fecha = JSON.stringify(datos[i].fecha);
+					listItem.innerHTML = descripcion + "  " + temperatura + "º  " + iluminacion + "%" + "  " + fecha;
 					listElement.appendChild(listItem);
 				}
 			});
