@@ -1,8 +1,12 @@
+/*          GENERAL         */ 
+
 body {
     background-image: url("background.jpg");
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
+
+/*          INDEX           */
 
 .Bienvenida {
     font-size: 30px;
@@ -27,6 +31,82 @@ body {
 }
 
 .boton_eleccion:hover {
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #000000;
+}
+
+/*          SENSORES            */
+
+.pagina_sensores {
+    border-radius: 10px;
+    border-color: rgb(0, 0, 0);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 20px;
+}
+
+#formulario {
+    background-color: #ffffff;
+    border-radius: 10px;
+    border-color: rgb(0, 0, 0);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 20px;
+}
+
+.labels {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.inputs {
+    height: 50px;
+    background-color: #ffffff;
+    color: #000000;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    width: auto;
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.inputs:hover {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+}
+
+.inputs:focus {
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #ffffff;
+}
+
+.boton_enviar {
+    height: 50px;
+    background-color: #000000;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    width: auto;
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.boton_enviar:hover {
     background-color: #ffffff;
     color: #000000;
     border: 2px solid #000000;

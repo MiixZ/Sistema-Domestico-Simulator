@@ -1,0 +1,22 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link href="contorno.css" rel="stylesheet" type="text/css">
+        <script src="controlador.js" defer></script>
+		<title>Sensores</title>
+	</head>
+
+	<body>
+        <div class="pagina_sensores">
+            <h1> Introduzca los valores </h1>
+
+            <form id="formulario" action="javascript:void(0);" onsubmit="enviar();">
+                <label class="labels" for="temp">¿Qué temperatura hace?</label> <input class="inputs" type="number" id="temp"/><br />
+                <label class="labels" for="ilum">¿Qué % de iluminación hace en este momento?</label> <input class="inputs" type="number" id="ilum" /><br />
+                <input class="boton_enviar" type="submit" value="Enviar"/>
+            </form>
+            
+            <span id="resul"></span>
+        </div>
+	</body>
+</html>

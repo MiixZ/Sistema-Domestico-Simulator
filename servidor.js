@@ -49,7 +49,7 @@ MongoClient.connect("mongodb://localhost:27017/", { useUnifiedTopology: true }, 
 	dbo.createCollection("test", function(err, collection) {
     	io.sockets.on('connection',
 		function(client) {
-			client.emit('my-address', {host:client.request.connection.remoteAddress, port:client.request.connection.remotePort});
+			client.emit('my-address', { host:client.request.connection.remoteAddress, port:client.request.connection.remotePort });
 			client.on('poner', function (data) {
 				collection.insert(data, {safe:true}, function(err, result) {});
 			});
