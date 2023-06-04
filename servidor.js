@@ -40,13 +40,12 @@ var httpServer = http.createServer(
 	}
 );
 
-
-
 MongoClient.connect("mongodb://localhost:27017/", { useUnifiedTopology: true }, function(err, db) {
 	httpServer.listen(8080);
 	var io = socketio(httpServer);
     console.log("Conectado a la base de datos.");
     let VentanaAbierta = false, AireOn = false;
+
     var iluminacion = 50; temperatura = 29;
 
 	var dbo = db.db("domotica");
@@ -64,16 +63,23 @@ MongoClient.connect("mongodb://localhost:27017/", { useUnifiedTopology: true }, 
             iluminacion = data.ilum;
             console.log("Iluminación: " + data.ilum + "%, Temperatura: " + temperatura + "º");
 
+            Agente(iluminacion, temperatura, client, AireOn, VentanaAbierta, false);
+
             client.emit('actualidad_sensores', {
                 ilum: iluminacion,
                 temp: temperatura
             });
 
-            Agente(iluminacion, temperatura, client, AireOn, VentanaAbierta);
-
             collection.find().toArray().then(function(items) {
                 client.emit('historico', items);
             });
+        });
+
+        client.on('bools', function (data) {
+            VentanaAbierta = data.VentanaAbierta;
+            AireOn = data.AireOn;
+
+            Agente(iluminacion, temperatura, client, AireOn, VentanaAbierta, true);
         });
 
         collection.find().toArray().then(function(items) {
@@ -85,52 +91,69 @@ MongoClient.connect("mongodb://localhost:27017/", { useUnifiedTopology: true }, 
             temp: temperatura
         });
 
-        Agente(iluminacion, temperatura, client, AireOn, VentanaAbierta);
+        Agente(iluminacion, temperatura, client, AireOn, VentanaAbierta, false);
     });
 });
 
-function Agente(ilum, temp, client, AireOn, VentanaAbierta) {
-    if (temp > 35 && !AireOn) {
-        AireOn = true;
+function Agente(ilum, temp, client, AireOn, VentanaAbierta, ordenadoPorCliente) {
+
+    if (VentanaAbierta && AireOn) {
         client.emit('alerta', { peligroTemp: true,
-             peligroIlum: false,
-             mensajeTemp: "Agente: ¡LA TEMPERATURA ES DEMASIADO ALTA!",
-             mensajeIlum: "No hay peligro." 
+            peligroIlum: true,
+            mensajeIlum: "EL AIRE Y LA VENTANA ESTÁN ABIERTOS.",
+            mensajeTemp: "EL AIRE Y LA VENTANA ESTÁN ABIERTOS."
+        });
+    } else if (ilum < 20 && temp > 35 && !VentanaAbierta && !AireOn) {
+        client.emit('alerta', { peligroTemp: true,
+            peligroIlum: true,
+            mensajeTemp: "Agente: TEMPERATURA: ¡PELIGRO EXTREMO!",
+            mensajeIlum: "Agente: ILUMINACIÓN: ¡PELIGRO EXTREMO!" });
+    } else if (temp > 35 && !AireOn) {
+        if (!ordenadoPorCliente)
+            AireOn = true;
+
+        client.emit('alerta', { peligroTemp: true,
+            peligroIlum: false,
+            mensajeTemp: "Agente: ¡LA TEMPERATURA ES DEMASIADO ALTA!",
+            mensajeIlum: "No hay peligro." 
         });
     } else if (temp <= 27 && AireOn) {
-        AireOn = false;
+        if (!ordenadoPorCliente)
+            AireOn = false;
+
         client.emit('alerta', { peligroTemp: false,
-             peligroIlum: false,
-             mensajeTemp: "No hay peligro.",
-             mensajeIlum: "No hay peligro." 
+            peligroIlum: false,
+            mensajeTemp: "No hay peligro.",
+            mensajeIlum: "No hay peligro." 
         });
     } else if (ilum < 20 && !VentanaAbierta) {
-        VentanaAbierta = true;
+        if (!ordenadoPorCliente)
+            VentanaAbierta = true;
+
         client.emit('alerta', { peligroTemp: false,
-             peligroIlum: true,
-             mensajeIlum: "Agente: ¡LA ILUMINACIÓN ES DEMASIADO BAJA!",
-             mensajeTemp: "No hay peligro." 
+            peligroIlum: true,
+            mensajeIlum: "Agente: ¡LA ILUMINACIÓN ES DEMASIADO BAJA!",
+            mensajeTemp: "No hay peligro." 
         });
     } else if (ilum >= 70 && VentanaAbierta) {
-        VentanaAbierta = false;
+        if (!ordenadoPorCliente)
+            VentanaAbierta = false;
+
         client.emit('alerta', { peligroTemp: false,
-             peligroIlum: false,
-             mensajeIlum: "No hay peligro.",
-             mensajeTemp: "No hay peligro."
+            peligroIlum: false,
+            mensajeIlum: "No hay peligro.",
+            mensajeTemp: "No hay peligro."
         });
-    } else if (ilum < 20 && temp > 35) {
-        AireOn = true;
-        client.emit('alerta', { peligroTemp: true,
-             peligroIlum: true,
-             mensajeTemp: "Agente: TEMPERATURA: ¡PELIGRO EXTREMO!",
-             mensajeIlum: "Agente: ILUMINACIÓN: ¡PELIGRO EXTREMO!" });
-    } else {
+    } else if(!ordenadoPorCliente) {
         client.emit('alerta', { peligroTemp: false,
-             peligroIlum: false,
-             mensajeTemp: "No hay peligro.",
-             mensajeIlum: "No hay peligro." 
+            peligroIlum: false,
+            mensajeTemp: "No hay peligro.",
+            mensajeIlum: "No hay peligro." 
         });
     }
+
+    if (!ordenadoPorCliente)
+        client.emit('bools', { VentanaAbierta: VentanaAbierta, AireOn: AireOn });
 }
 
 console.log("Servidor inicializado.");

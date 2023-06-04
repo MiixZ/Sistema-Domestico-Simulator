@@ -7,10 +7,19 @@
 	<body>
 		<div class="Bienvenida"> 
             <h1>Bienvenido al sistema domótico.</h1>
-            <h2> Indíquenos qué es lo que quiere hacer. </h2>
+            <h2> Indíquenos qué es lo que quiere hacer.</h2>
 
-            <button class="boton_eleccion" onclick="window.location.href = 'sensores.html'">Ver sensores</button>
-            <button class="boton_eleccion" onclick="window.location.href = 'log.html'">Ver actuadores</button>
+			<div class="interruptores">
+				<div class="div_interruptor">
+					<label for="interruptor" class="label_interruptor">Activar/Desactivar aire acondicionado:</label>
+					<input type="checkbox" id="interruptor" onchange="actualizarbools();">
+				</div>
+
+				<div class="div_interruptor">
+					<label for="interruptor" class="label_interruptor">Abrir/Cerrar persiana:</label>
+					<input type="checkbox" id="interruptor2" onchange="actualizarbools();">
+				</div>
+			</div>
 
 			<h3> Cambie los sensores: </h3>
 			<form id="formulario" action="javascript:void(0);" onsubmit="enviar()">
@@ -56,6 +65,13 @@
 		<script type="text/javascript">
 			var serviceURL = document.URL;
 			var socket = io.connect(serviceURL);
+
+			function actualizarbools() {
+				var aire = document.getElementById("interruptor");
+				var persiana = document.getElementById("interruptor2");
+
+				socket.emit('bools', {AireOn: aire.checked, VentanaAbierta: persiana.checked});
+			}
 
 			function enviar() {
 				var val1 = document.getElementById("temp").value;
@@ -104,6 +120,20 @@
 					fecha = JSON.stringify(datos[i].fecha);
 					listItem.innerHTML = descripcion + "  " + temperatura + "º  " + iluminacion + "%" + "  " + fecha;
 					listElement.appendChild(listItem);
+				}
+			});
+
+			socket.on('bools', function(datos) {
+				if (datos.AireOn) {
+					document.getElementById("interruptor").checked = true;
+				} else if(!datos.AireOn) {
+					document.getElementById("interruptor").checked = false;
+				}
+
+				if (datos.VentanaAbierta) {
+					document.getElementById("interruptor2").checked = true;
+				} else if(!datos.VentanaAbierta) {
+					document.getElementById("interruptor2").checked = false;
 				}
 			});
 
