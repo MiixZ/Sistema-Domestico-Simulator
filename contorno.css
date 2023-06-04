@@ -49,9 +49,9 @@ body {
 }
 
 #formulario {
-    background-color: #ffffff;
-    border-radius: 10px;
-    border-color: rgb(0, 0, 0);
+    background-color: #f3d9d9;
+    border-radius: 50px;
+    border-color: rgb(247, 0, 0);
     margin-top: 20px;
     margin-bottom: 20px;
     margin-left: 20%;
@@ -110,4 +110,92 @@ body {
     background-color: #ffffff;
     color: #000000;
     border: 2px solid #000000;
+}
+
+/*          LOG            */
+
+#alertas {
+    border-radius: 10px;
+    border-color: rgb(0, 0, 0);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 20px;
+}
+
+#temperatura {
+    border-radius: 10px;
+    border-color: rgb(0, 0, 0);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 20px;
+}
+
+#iluminacion {
+    border-radius: 10px;
+    border-color: rgb(0, 0, 0);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 20px;
+}
+
+#informacion {
+    border-radius: 10px;
+    border-color: rgb(0, 0, 0);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 20px;
+}
+
+#iluminacion_info {
+    border-radius: 10px;
+    border-color: rgb(0, 0, 0);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 20px;
+}
+
+#temperatura_info {
+    border-radius: 10px;
+    border-color: rgb(0, 0, 0);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 20px;
+}
+
+#historial {
+    color: white;
+    border-radius: 10px;
+    border-color: rgb(0, 0, 0);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 10%;
+    margin-right: 10%;
+    padding: 20px;
+}
+
+ul {
+    display: flex;
+    flex-direction: column;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000000;
+    border-radius: 10px;
+}
+
+li {
+    float: left;
 }

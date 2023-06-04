@@ -6,11 +6,122 @@
 	</head>
 	<body>
 		<div class="Bienvenida"> 
-            <h1>Bienvenido al sistema domótico</h1>
-            <h2> ¿Qué desea hacer? </h2>
+            <h1>Bienvenido al sistema domótico.</h1>
+            <h2> Indíquenos qué es lo que quiere hacer. </h2>
 
             <button class="boton_eleccion" onclick="window.location.href = 'sensores.html'">Ver sensores</button>
             <button class="boton_eleccion" onclick="window.location.href = 'log.html'">Ver actuadores</button>
+
+			<h3> Cambie los sensores: </h3>
+			<form id="formulario" action="javascript:void(0);" onsubmit="enviar()">
+                <label class="labels" for="temp">¿Qué temperatura hace?</label> <input class="inputs" type="number" id="temp" required/><br />
+                <label class="labels" for="ilum">¿Qué % de iluminación hace en este momento?</label> <input class="inputs" type="number" id="ilum" required/><br />
+                <input class="boton_enviar" type="submit" value="Enviar" onclick="enviar()"/>
+            </form>
         </div>
+
+		<div class="pagina_sensores">
+            <h1> Actualidad hogar </h1>
+            <div id="alertas">
+				<h2> Tu agente de confianza te informa de las alertas: </h2>
+                <div id="temperatura">
+
+                </div>
+                <div id="iluminacion">
+
+                </div>
+            </div>
+            
+			<h2> Información del hogar: </h2>
+            <div id="informacion">
+				<h3> Temperatura: </h3>
+                <div id="temperatura_info">
+
+                </div>
+
+				<h3> Iluminación: </h3>
+                <div id="iluminacion_info">
+
+                </div>
+            </div>
+
+			<h2> Historial </h2>
+			<div id="historial"> 
+
+			</div>
+        </div>
+
+		<script src="/socket.io/socket.io.js"></script>
+
+		<script type="text/javascript">
+			var serviceURL = document.URL;
+			var socket = io.connect(serviceURL);
+
+			function enviar() {
+				var val1 = document.getElementById("temp").value;
+				var val2 = document.getElementById("ilum").value;
+				
+				socket.emit('sensores', {temp: val1, ilum: val2});
+
+				document.getElementById("temp").value = "";
+				document.getElementById("ilum").value = "";
+			}
+
+			socket.on('alerta', function(data) {
+				actualizarAlertas(data);
+			});
+
+			socket.on('actualidad_sensores', function(data) {
+				var d = new Date();
+				var fecha = d.getDate() + "/" + d.getMonth() + "/" + d.getFullYear() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+
+				var divilum = document.getElementById("iluminacion_info");
+				var divtemp = document.getElementById("temperatura_info");
+
+				divilum.innerHTML = data.ilum + "%";
+				divtemp.innerHTML = data.temp + "º";
+				divilum.innerHTML += " (" + fecha + ")";
+			});
+
+			socket.on('historico', function(datos) {
+				var listContainer = document.getElementById('historial');
+				listContainer.innerHTML = '';
+
+				var listElement = document.createElement('ul');
+				listContainer.appendChild(listElement);
+
+				var num = datos.length;
+				for(var i=0; i<num; i++) {
+					var listItem = document.createElement('li');
+					descripcion = JSON.stringify(datos[i].descripcion);
+					temperatura = JSON.stringify(datos[i].temp);
+					iluminacion = JSON.stringify(datos[i].ilum);
+					listItem.innerHTML = descripcion + " - " + temperatura + "º - " + iluminacion + "%";
+					listElement.appendChild(listItem);
+				}
+			});
+
+			function actualizarAlertas(data) {
+				var alertas = document.getElementById("alertas");
+				var temp = document.getElementById("temperatura");
+				var ilum = document.getElementById("iluminacion");
+				
+				if (data.peligroTemp) {
+					temp.style.backgroundColor = "red";
+				} else {
+					temp.style.backgroundColor = "white";
+				}
+
+				temp.innerHTML = data.mensajeTemp;
+				
+				if (data.peligroIlum) {
+					ilum.style.backgroundColor = "red";
+				} else {
+					ilum.style.backgroundColor = "white";
+				}
+
+				ilum.innerHTML = data.mensajeIlum;
+			}
+		</script>
 	</body>
 </html>

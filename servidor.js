@@ -41,25 +41,98 @@ var httpServer = http.createServer(
 );
 
 
+
 MongoClient.connect("mongodb://localhost:27017/", { useUnifiedTopology: true }, function(err, db) {
 	httpServer.listen(8080);
 	var io = socketio(httpServer);
+    console.log("Conectado a la base de datos.");
+    let VentanaAbierta = false, AireOn = false;
+    var iluminacion = 50; temperatura = 29;
 
 	var dbo = db.db("domotica");
-	dbo.createCollection("test", function(err, collection) {
-    	io.sockets.on('connection',
-		function(client) {
-			client.emit('my-address', { host:client.request.connection.remoteAddress, port:client.request.connection.remotePort });
-			client.on('poner', function (data) {
-				collection.insert(data, {safe:true}, function(err, result) {});
-			});
-			client.on('obtener', function (data) {
-				collection.find(data).toArray(function(err, results) {
-					client.emit('obtener', results);
-				});
-			});
-		});
+
+    var collection = dbo.collection("valores");
+
+    io.sockets.on('connection',
+    function(client) {
+        client.on('sensores', function (data) {
+            var datosActualizados = { descripcion: "Modificando sensores... ", ilum: data.ilum, temp: data.temp };
+
+            collection.insertOne(datosActualizados).then(function(result) {});
+
+            temperatura = data.temp;
+            iluminacion = data.ilum;
+            console.log("Iluminación: " + data.ilum + "%, Temperatura: " + temperatura + "º");
+
+            client.emit('actualidad_sensores', {
+                ilum: iluminacion,
+                temp: temperatura
+            });
+
+            Agente(iluminacion, temperatura, client, AireOn, VentanaAbierta);
+
+            collection.find().toArray().then(function(items) {
+                console.log("items:", JSON.stringify(items));
+                client.emit('historico', items);
+            });
+        });
+
+        collection.find().toArray().then(function(items) {
+            console.log("items:", JSON.stringify(items));
+            client.emit('historico', items);
+        });
+
+        client.emit('actualidad_sensores', {
+            ilum: iluminacion,
+            temp: temperatura
+        });
+
+        Agente(iluminacion, temperatura, client, AireOn, VentanaAbierta);
     });
 });
+
+function Agente(ilum, temp, client, AireOn, VentanaAbierta) {
+    if (temp > 35 && !AireOn) {
+        AireOn = true;
+        client.emit('alerta', { peligroTemp: true,
+             peligroIlum: false,
+             mensajeTemp: "Agente: ¡LA TEMPERATURA ES DEMASIADO ALTA!",
+             mensajeIlum: "No hay peligro." 
+        });
+    } else if (temp <= 27 && AireOn) {
+        AireOn = false;
+        client.emit('alerta', { peligroTemp: false,
+             peligroIlum: false,
+             mensajeTemp: "No hay peligro.",
+             mensajeIlum: "No hay peligro." 
+        });
+    } else if (ilum < 20 && !VentanaAbierta) {
+        VentanaAbierta = true;
+        client.emit('alerta', { peligroTemp: false,
+             peligroIlum: true,
+             mensajeIlum: "Agente: ¡LA ILUMINACIÓN ES DEMASIADO BAJA!",
+             mensajeTemp: "No hay peligro." 
+        });
+    } else if (ilum >= 70 && VentanaAbierta) {
+        VentanaAbierta = false;
+        client.emit('alerta', { peligroTemp: false,
+             peligroIlum: false,
+             mensajeIlum: "No hay peligro.",
+             mensajeTemp: "No hay peligro."
+        });
+    } else if (ilum < 20 && temp > 35) {
+        AireOn = true;
+        client.emit('alerta', { peligroTemp: true,
+             peligroIlum: true,
+             mensajeTemp: "Agente: TEMPERATURA: ¡PELIGRO EXTREMO!",
+             mensajeIlum: "Agente: ILUMINACIÓN: ¡PELIGRO EXTREMO!" });
+    } else {
+        client.emit('alerta', { peligroTemp: false,
+             peligroIlum: false,
+             mensajeTemp: "No hay peligro.",
+             mensajeIlum: "No hay peligro." 
+        });
+    }
+}
 
 console.log("Servidor inicializado.");
