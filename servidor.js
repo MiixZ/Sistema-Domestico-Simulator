@@ -108,7 +108,7 @@ function Agente(ilum, temp, client, AireOn, VentanaAbierta, ordenadoPorCliente) 
             peligroIlum: true,
             mensajeTemp: "Agente: TEMPERATURA: ¡PELIGRO EXTREMO!",
             mensajeIlum: "Agente: ILUMINACIÓN: ¡PELIGRO EXTREMO!" });
-    } else if (temp > 35 && !AireOn) {
+    } else if (ilum < 20 && temp > 35 && VentanaAbierta && !AireOn) {
         if (!ordenadoPorCliente)
             AireOn = true;
 
@@ -117,7 +117,31 @@ function Agente(ilum, temp, client, AireOn, VentanaAbierta, ordenadoPorCliente) 
             mensajeTemp: "Agente: ¡LA TEMPERATURA ES DEMASIADO ALTA!",
             mensajeIlum: "No hay peligro." 
         });
-    } else if (temp <= 27 && AireOn) {
+    } else if(ilum < 20 && temp > 35 && !VentanaAbierta && AireOn) {
+        if (!ordenadoPorCliente)
+        AireOn = true;
+
+        client.emit('alerta', { peligroTemp: false,
+            peligroIlum: true,
+            mensajeTemp: "No hay peligro.",
+            mensajeIlum: "Agente: ¡LA ILUMINACIÓN ES DEMASIADO BAJA!" 
+        });
+    } else if (temp > 35 && !AireOn && ilum >= 20) {
+        if (!ordenadoPorCliente)
+            AireOn = true;
+
+        client.emit('alerta', { peligroTemp: true,
+            peligroIlum: false,
+            mensajeTemp: "Agente: ¡LA TEMPERATURA ES DEMASIADO ALTA!",
+            mensajeIlum: "No hay peligro." 
+        });
+    } else if ((temp <= 35 && AireOn && ilum >= 20) || (temp <= 35 && !AireOn && ilum >= 20)) {
+        client.emit('alerta', { peligroTemp: false,
+            peligroIlum: false,
+            mensajeTemp: "No hay peligro.",
+            mensajeIlum: "No hay peligro." 
+        });
+    } else if (temp <= 27 && ilum >= 20) {
         if (!ordenadoPorCliente)
             AireOn = false;
 
@@ -126,7 +150,7 @@ function Agente(ilum, temp, client, AireOn, VentanaAbierta, ordenadoPorCliente) 
             mensajeTemp: "No hay peligro.",
             mensajeIlum: "No hay peligro." 
         });
-    } else if (ilum < 20 && !VentanaAbierta) {
+    } else if (ilum < 20 && !VentanaAbierta && temp <= 35) {
         if (!ordenadoPorCliente)
             VentanaAbierta = true;
 
@@ -135,7 +159,13 @@ function Agente(ilum, temp, client, AireOn, VentanaAbierta, ordenadoPorCliente) 
             mensajeIlum: "Agente: ¡LA ILUMINACIÓN ES DEMASIADO BAJA!",
             mensajeTemp: "No hay peligro." 
         });
-    } else if (ilum >= 70 && VentanaAbierta) {
+    } else if (ilum >= 20 && VentanaAbierta && temp <= 35) {
+        client.emit('alerta', { peligroTemp: false,
+            peligroIlum: false,
+            mensajeIlum: "No hay peligro.",
+            mensajeTemp: "No hay peligro."
+        });
+    } else if (ilum >= 70 && VentanaAbierta && temp <= 35) {
         if (!ordenadoPorCliente)
             VentanaAbierta = false;
 
